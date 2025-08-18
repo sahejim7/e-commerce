@@ -42,12 +42,8 @@ const products = [
 const Home = () => {
   return (
     <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <section className="py-8">
-        <h1 className="text-heading-1 font-jost">Nike</h1>
-      </section>
-
       <section aria-labelledby="latest" className="pb-12">
-        <h2 id="latest" className="mb-6 text-heading-3 text-[--color-dark-900]">
+        <h2 id="latest" className="mb-6 text-heading-3 text-dark-900">
           Latest shoes
         </h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
