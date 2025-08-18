@@ -22,11 +22,11 @@ const columns = [
 
 export default function Footer() {
   return (
-    <footer className="bg-[--color-dark-900] text-[--color-light-100]">
+    <footer className="bg-[--color-dark-900] !bg-[--color-dark-900] text-[--color-light-100]">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-12">
           <div className="flex items-start md:col-span-3">
-            <Image src="/logo.svg" alt="Nike" width={48} height={48} />
+            <Image src="/logo.svg" alt="Nike" width={48} height={48} className="invert" />
           </div>
 
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 md:col-span-7">
@@ -38,7 +38,7 @@ export default function Footer() {
                     <li key={l}>
                       <Link
                         href="#"
-                        className="text-body text-[--color-dark-500] hover:text-[--color-light-300]"
+                        className="text-body text-[--color-light-400] hover:text-[--color-light-300]"
                       >
                         {l}
                       </Link>

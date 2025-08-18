@@ -17,9 +17,9 @@ export interface CardProps {
 }
 
 const toneToBg: Record<BadgeTone, string> = {
-  red: "bg-[--color-red]/10 text-[--color-red]",
-  green: "bg-[--color-green]/10 text-[--color-green]",
-  orange: "bg-[--color-orange]/10 text-[--color-orange]",
+  red: "text-[--color-red]",
+  green: "text-[--color-green]",
+  orange: "text-[--color-orange]",
 };
 
 export default function Card({
@@ -43,8 +43,8 @@ export default function Card({
       <div className="relative aspect-square overflow-hidden rounded-t-xl bg-[--color-light-200]">
         {badge?.label && (
           <span
-            className={`absolute left-4 top-4 inline-flex items-center rounded-full px-3 py-1 text-caption ${
-              badge.tone ? toneToBg[badge.tone] : "bg-[--color-orange]/10 text-[--color-orange]"
+            className={`absolute left-4 top-4 inline-flex items-center rounded-full px-3 py-1 text-caption bg-[--color-light-200] ${
+              badge.tone ? toneToBg[badge.tone] : "text-[--color-orange]"
             }`}
           >
             {badge.label}
