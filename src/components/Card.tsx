@@ -43,7 +43,7 @@ export default function Card({
       <div className="relative aspect-square overflow-hidden rounded-t-xl bg-[--color-light-200]">
         {badge?.label && (
           <span
-            className={`absolute left-4 top-4 inline-flex items-center rounded-full px-3 py-1 text-caption bg-[--color-light-200] ring-1 ring-[--color-light-300] ${
+            className={`absolute left-4 top-4 z-10 inline-flex items-center rounded-full px-3 py-1 text-caption bg-[--color-light-100] ring-1 ring-[--color-light-300] shadow-sm ${
               badge.tone ? toneToBg[badge.tone] : "text-[--color-orange]"
             }`}
           >
