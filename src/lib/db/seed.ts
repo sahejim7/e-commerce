@@ -17,7 +17,6 @@ type RGBHex = `#${string}`;
 const log = (...args: unknown[]) => console.log('[seed]', ...args);
 const err = (...args: unknown[]) => console.error('[seed:error]', ...args);
 
-
 function pick<T>(arr: T[], n: number) {
   const a = [...arr];
   const out: T[] = [];
@@ -60,12 +59,12 @@ async function seed() {
     }
 
     const sizeRows = [
-      { name: 'XS', slug: 'xs', sortOrder: 0 },
-      { name: 'S', slug: 's', sortOrder: 1 },
-      { name: 'M', slug: 'm', sortOrder: 2 },
-      { name: 'L', slug: 'l', sortOrder: 3 },
-      { name: 'XL', slug: 'xl', sortOrder: 4 },
-      { name: 'XXL', slug: 'xxl', sortOrder: 5 },
+      { name: '7', slug: '7', sortOrder: 0 },
+      { name: '8', slug: '8', sortOrder: 1 },
+      { name: '9', slug: '9', sortOrder: 2 },
+      { name: '10', slug: '10', sortOrder: 3 },
+      { name: '11', slug: '11', sortOrder: 4 },
+      { name: '12', slug: '12', sortOrder: 5 },
     ].map((s) => insertSizeSchema.parse(s));
     for (const row of sizeRows) {
       const exists = await db.select().from(sizes).where(eq(sizes.slug, row.slug)).limit(1);
