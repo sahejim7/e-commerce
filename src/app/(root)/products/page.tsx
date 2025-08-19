@@ -80,7 +80,7 @@ const MOCK_PRODUCTS: Product[] = [
     colors: ["white", "blue"],
     price: 98.3,
     meta: "1 Colour",
-    image: "/shoes/shoe-5.webp",
+    image: "/shoes/shoe-3.webp",
     createdAt: "2025-08-10T00:00:00.000Z",
     badge: { label: "Best Seller", tone: "red" },
   },
@@ -185,7 +185,7 @@ export default async function ProductsPage({
               <p className="text-body text-dark-700">No products match your filters.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 pb-6">
               {sorted.map((p) => (
                 <Card
                   key={p.id}
