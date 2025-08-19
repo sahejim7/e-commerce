@@ -95,13 +95,14 @@ export type NormalizedProductFilters = {
 
 export function parseFilterParams(sp: Record<string, string | string[] | undefined>): NormalizedProductFilters {
   const getArr = (k: string) => {
-    const v = sp[k];
-    if (Array.isArray(v)) return v.map(String);
-    if (v === undefined) return [] as string[];
-    return [String(v)];
+    const v1 = sp[k];
+    const v2 = sp[`${k}[]`];
+    const arr1 = Array.isArray(v1) ? v1.map(String) : v1 === undefined ? [] : [String(v1)];
+    const arr2 = Array.isArray(v2) ? (v2 as string[]).map(String) : v2 === undefined ? [] : [String(v2 as string)];
+    return [...arr1, ...arr2];
   };
   const getStr = (k: string) => {
-    const v = sp[k];
+    const v = sp[k] ?? sp[`${k}[]`];
     if (v === undefined) return undefined;
     return Array.isArray(v) ? (v[0] ? String(v[0]) : undefined) : String(v);
   };
@@ -109,10 +110,10 @@ export function parseFilterParams(sp: Record<string, string | string[] | undefin
   const search = getStr("search")?.trim() || undefined;
 
   const genderSlugs = getArr("gender").map((s) => s.toLowerCase());
-  const sizeSlugs = getArr("size");
-  const colorSlugs = getArr("color");
-  const brandSlugs = getArr("brand");
-  const categorySlugs = getArr("category");
+  const sizeSlugs = getArr("size").map((s) => s.toLowerCase());
+  const colorSlugs = getArr("color").map((s) => s.toLowerCase());
+  const brandSlugs = getArr("brand").map((s) => s.toLowerCase());
+  const categorySlugs = getArr("category").map((s) => s.toLowerCase());
 
   const priceRangesStr = getArr("price");
   const priceRanges: Array<[number | undefined, number | undefined]> = priceRangesStr
