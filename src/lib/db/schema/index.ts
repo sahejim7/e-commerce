@@ -3,5 +3,3 @@ export * from './session';
 export * from './account';
 export * from './verification';
 export * from './guest';
-
-export { products, orders, orderItems } from '../schema';

@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies } from "next/headers";
+import {cookies, headers} from "next/headers";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -60,8 +60,15 @@ const signUpSchema = z.object({
   name: nameSchema,
 });
 
-export async function signUp(input: z.infer<typeof signUpSchema>) {
-  const data = signUpSchema.parse(input);
+export async function signUp(formData: FormData) {
+  const rawData = {
+    name: formData.get('name') as string,
+    email: formData.get('email') as string,
+    password: formData.get('password') as string,
+  }
+
+  const data = signUpSchema.parse(rawData);
+
   const res = await auth.api.signUpEmail({
     body: {
       email: data.email,
@@ -79,8 +86,14 @@ const signInSchema = z.object({
   password: passwordSchema,
 });
 
-export async function signIn(input: z.infer<typeof signInSchema>) {
-  const data = signInSchema.parse(input);
+export async function signIn(formData: FormData) {
+  const rawData = {
+    email: formData.get('email') as string,
+    password: formData.get('password') as string,
+  }
+
+  const data = signInSchema.parse(rawData);
+
   const res = await auth.api.signInEmail({
     body: {
       email: data.email,
@@ -90,6 +103,19 @@ export async function signIn(input: z.infer<typeof signInSchema>) {
 
   await migrateGuestToUser();
   return { ok: true, userId: res.user?.id };
+}
+
+export async function getCurrentUser() {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers()
+    })
+
+    return session?.user ?? null;
+  } catch (e) {
+    console.log(e);
+    return null;
+  }
 }
 
 export async function signOut() {
