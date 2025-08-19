@@ -8,6 +8,13 @@
       "when": 1755596068862,
       "tag": "0000_warm_banshee",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1755604620987,
+      "tag": "0001_dear_lightspeed",
+      "breakpoints": true
     }
   ]
 }
