@@ -91,6 +91,11 @@ function toArray(v: string | string[] | undefined): string[] {
   return Array.isArray(v) ? v : [v];
 }
 
+function getParamArray(sp: SearchParams, key: string): string[] {
+  const v = (sp[key] as string | string[] | undefined) ?? (sp[`${key}[]`] as string | string[] | undefined);
+  return toArray(v);
+}
+
 function matchesRange(price: number, ranges: string[]): boolean {
   if (ranges.length === 0) return true;
   return ranges.some((r) => {
@@ -102,10 +107,10 @@ function matchesRange(price: number, ranges: string[]): boolean {
 }
 
 function applyFilters(data: Product[], params: SearchParams): Product[] {
-  const genders = toArray(params.gender as string | string[] | undefined) as Product["gender"][];
-  const sizes = toArray(params.size as string | string[] | undefined);
-  const colors = toArray(params.color as string | string[] | undefined);
-  const priceRanges = toArray(params.price as string | string[] | undefined);
+  const genders = getParamArray(params as SearchParams, "gender") as Product["gender"][];
+  const sizes = getParamArray(params as SearchParams, "size");
+  const colors = getParamArray(params as SearchParams, "color");
+  const priceRanges = getParamArray(params as SearchParams, "price");
 
   return data.filter((p) => {
     const genderOk = genders.length ? genders.includes(p.gender) : true;
@@ -142,10 +147,10 @@ export default async function ProductsPage({
   const sorted = applySort(filtered, (sp.sort as string) || "featured");
 
   const activeBadges: string[] = [];
-  toArray(sp.gender).forEach((g) => activeBadges.push(g[0].toUpperCase() + g.slice(1)));
-  toArray(sp.size).forEach((s) => activeBadges.push(`Size: ${s}`));
-  toArray(sp.color).forEach((c) => activeBadges.push(c[0].toUpperCase() + c.slice(1)));
-  toArray(sp.price).forEach((p) => {
+  getParamArray(sp, "gender").forEach((g) => activeBadges.push(g[0].toUpperCase() + g.slice(1)));
+  getParamArray(sp, "size").forEach((s) => activeBadges.push(`Size: ${s}`));
+  getParamArray(sp, "color").forEach((c) => activeBadges.push(c[0].toUpperCase() + c.slice(1)));
+  getParamArray(sp, "price").forEach((p) => {
     const [min, max] = String(p).split("-");
     const label =
       min && max ? `$${min} - $${max}` : min && !max ? `Over $${min}` : `$0 - $${max}`;
