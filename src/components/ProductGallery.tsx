@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
+import { useVariantStore } from "@/store/variant";
 
 type Variant = {
   color: string;
@@ -10,6 +11,7 @@ type Variant = {
 };
 
 export interface ProductGalleryProps {
+  productId: string;
   variants: Variant[];
   initialVariantIndex?: number;
   className?: string;
@@ -20,6 +22,7 @@ function isValidSrc(src: string | undefined | null) {
 }
 
 export default function ProductGallery({
+  productId,
   variants,
   initialVariantIndex = 0,
   className = "",
@@ -29,9 +32,10 @@ export default function ProductGallery({
     [variants]
   );
 
-  const [variantIndex, setVariantIndex] = useState(() =>
-    Math.min(initialVariantIndex, Math.max(validVariants.length - 1, 0))
-  );
+  const variantIndex =
+    useVariantStore(
+      (s) => s.selectedByProduct[productId] ?? Math.min(initialVariantIndex, Math.max(validVariants.length - 1, 0))
+    );
 
   const images = validVariants[variantIndex]?.images?.filter(isValidSrc) ?? [];
   const [activeIndex, setActiveIndex] = useState(0);
@@ -122,28 +126,6 @@ export default function ProductGallery({
         )}
       </div>
 
-      <div className="order-3 mt-1 flex gap-3 lg:order-3">
-        {validVariants.map((v, i) => {
-          const thumb = v.images.find(isValidSrc);
-          if (!thumb) return null;
-          const selected = i === variantIndex;
-          return (
-            <button
-              key={`${v.color}-${i}`}
-              aria-label={`Color ${v.color}`}
-              onClick={() => setVariantIndex(i)}
-              className={`relative h-16 w-20 overflow-hidden rounded-lg ring-1 ring-light-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-[--color-dark-500] ${selected ? "ring-[--color-dark-500]" : ""}`}
-            >
-              <Image src={thumb} alt={v.color} fill sizes="80px" className="object-cover" />
-              {selected && (
-                <span className="absolute right-1 top-1 rounded-full bg-light-100 p-1">
-                  <Check className="h-4 w-4 text-dark-900" />
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
     </section>
   );
 }
