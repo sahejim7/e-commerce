@@ -155,7 +155,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       </nav>
 
       <section className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_480px]">
-        <ProductGallery productId={product.id} variants={galleryVariants} className="lg:sticky lg:top-6" />
+        {galleryVariants.length > 0 && (
+          <ProductGallery productId={product.id} variants={galleryVariants} className="lg:sticky lg:top-6" />
+        )}
 
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-2">
