@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1755596068862,
-      "tag": "0000_warm_banshee",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1755604620987,
-      "tag": "0001_dear_lightspeed",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1755608794221,
-      "tag": "0002_silky_fixer",
+      "when": 1755672111623,
+      "tag": "0000_nosy_redwing",
       "breakpoints": true
     }
   ]
