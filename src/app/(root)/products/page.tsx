@@ -73,6 +73,7 @@ export default async function ProductsPage({
                     subtitle={p.subtitle ?? undefined}
                     imageSrc={p.imageUrl ?? "/shoes/shoe-1.jpg"}
                     price={price}
+                    href={`/products/${p.id}`}
                   />
                 );
               })}
