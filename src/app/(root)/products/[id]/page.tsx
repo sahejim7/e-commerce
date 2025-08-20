@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Card, CollapsibleSection, ProductGallery, SizePicker } from "@/components";
 import { Heart, ShoppingBag, Star } from "lucide-react";
+import ColorSwatches from "@/components/ColorSwatches";
 
 type Product = {
   id: string;
@@ -93,7 +94,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       </nav>
 
       <section className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_480px]">
-        <ProductGallery variants={product.variants} className="lg:sticky lg:top-6" />
+        <ProductGallery productId={product.id} variants={product.variants} className="lg:sticky lg:top-6" />
 
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-2">
@@ -115,6 +116,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             )}
           </div>
 
+          <ColorSwatches productId={product.id} variants={product.variants} />
           <SizePicker />
 
           <div className="flex flex-col gap-3">
