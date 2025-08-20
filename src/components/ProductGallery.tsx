@@ -80,7 +80,7 @@ export default function ProductGallery({
         ))}
       </div>
 
-      <div ref={mainRef} className="order-1 relative aspect-square w-full overflow-hidden rounded-xl bg-light-200 lg:order-2">
+      <div ref={mainRef} className="order-1 relative w-full h-[500px] overflow-hidden rounded-xl bg-light-200 lg:order-2">
         {images.length > 0 ? (
           <>
             <Image
@@ -91,14 +91,7 @@ export default function ProductGallery({
               className="object-cover"
               priority
             />
-            <div className="pointer-events-none absolute inset-x-0 bottom-3 flex items-center justify-center gap-2">
-              <span className="rounded-full bg-light-100/80 p-2 ring-1 ring-light-300">
-                <ChevronLeft className="h-5 w-5 text-dark-900" />
-              </span>
-              <span className="rounded-full bg-light-100/80 p-2 ring-1 ring-light-300">
-                <ChevronRight className="h-5 w-5 text-dark-900" />
-              </span>
-            </div>
+
             <div className="absolute inset-0 flex items-center justify-between px-2">
               <button
                 aria-label="Previous image"
