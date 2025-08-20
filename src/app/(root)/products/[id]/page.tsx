@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Card, CollapsibleSection, ProductGallery, SizePicker } from "@/components";
 import { Heart, ShoppingBag, Star } from "lucide-react";
