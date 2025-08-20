@@ -1,3 +1,5 @@
+
+
 "use server";
 
 import { and, asc, count, desc, eq, ilike, inArray, isNull, or, sql, type SQL } from "drizzle-orm";
@@ -11,6 +13,8 @@ import {
   products,
   sizes,
   colors,
+  users,
+  reviews,
   type SelectProduct,
   type SelectVariant,
   type SelectProductImage,
@@ -20,6 +24,7 @@ import {
   type SelectColor,
   type SelectSize,
 } from "@/lib/db/schema";
+
 import { NormalizedProductFilters } from "@/lib/utils/query";
 
 type ProductListItem = {
@@ -376,4 +381,120 @@ export async function getProduct(productId: string): Promise<FullProduct | null>
     variants: Array.from(variantsMap.values()),
     images: Array.from(imagesMap.values()),
   };
+}
+export type Review = {
+  id: string;
+  author: string;
+  rating: number;
+  title?: string;
+  content: string;
+  createdAt: string;
+};
+
+export type RecommendedProduct = {
+  id: string;
+  title: string;
+  price: number | null;
+  imageUrl: string;
+};
+
+export async function getProductReviews(productId: string): Promise<Review[]> {
+  const rows = await db
+    .select({
+      id: reviews.id,
+      rating: reviews.rating,
+      comment: reviews.comment,
+      createdAt: reviews.createdAt,
+      authorName: users.name,
+      authorEmail: users.email,
+    })
+    .from(reviews)
+    .innerJoin(users, eq(users.id, reviews.userId))
+    .where(eq(reviews.productId, productId))
+    .orderBy(desc(reviews.createdAt))
+    .limit(10);
+
+  return rows.map((r) => ({
+    id: r.id,
+    author: r.authorName?.trim() || r.authorEmail || "Anonymous",
+    rating: r.rating,
+    title: undefined,
+    content: r.comment || "",
+    createdAt: r.createdAt.toISOString(),
+  }));
+}
+
+export async function getRecommendedProducts(productId: string): Promise<RecommendedProduct[]> {
+  const base = await db
+    .select({
+      id: products.id,
+      categoryId: products.categoryId,
+      brandId: products.brandId,
+      genderId: products.genderId,
+    })
+    .from(products)
+    .where(eq(products.id, productId))
+    .limit(1);
+
+  if (!base.length) return [];
+  const b = base[0];
+
+  const v = db
+    .select({
+      productId: productVariants.productId,
+      price: sql<number>`${productVariants.price}::numeric`.as("price"),
+    })
+    .from(productVariants)
+    .as("v");
+
+  const pi = db
+    .select({
+      productId: productImages.productId,
+      url: productImages.url,
+      rn: sql<number>`row_number() over (partition by ${productImages.productId} order by ${productImages.isPrimary} desc, ${productImages.sortOrder} asc)`.as(
+        "rn",
+      ),
+    })
+    .from(productImages)
+    .as("pi");
+
+  const priority = sql<number>`
+    (case when ${products.categoryId} is not null and ${products.categoryId} = ${b.categoryId} then 1 else 0 end) * 3 +
+    (case when ${products.brandId} is not null and ${products.brandId} = ${b.brandId} then 1 else 0 end) * 2 +
+    (case when ${products.genderId} is not null and ${products.genderId} = ${b.genderId} then 1 else 0 end) * 1
+  `;
+
+  const rows = await db
+    .select({
+      id: products.id,
+      title: products.name,
+      minPrice: sql<number | null>`min(${v.price})`,
+      imageUrl: sql<string | null>`max(case when ${pi.rn} = 1 then ${pi.url} else null end)`,
+      createdAt: products.createdAt,
+    })
+    .from(products)
+    .leftJoin(v, eq(v.productId, products.id))
+    .leftJoin(pi, eq(pi.productId, products.id))
+    .where(and(eq(products.isPublished, true), sql`${products.id} <> ${productId}`))
+    .groupBy(products.id, products.name, products.createdAt)
+    .orderBy(
+      desc(priority),
+      desc(products.createdAt),
+      asc(products.id)
+    )
+    .limit(8);
+
+  const out: RecommendedProduct[] = [];
+  for (const r of rows) {
+    const img = r.imageUrl?.trim();
+    if (!img) continue;
+    out.push({
+      id: r.id,
+      title: r.title,
+      price: r.minPrice === null ? null : Number(r.minPrice),
+      imageUrl: img,
+    });
+    if (out.length >= 6) break;
+  }
+  return out;
 }
