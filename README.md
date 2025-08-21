@@ -1,47 +1,113 @@
-# E-Commerce App
+<div align="center">
+  <br />
+    <a href="" target="_blank">
+      <img src="public/readme/hero.webp" alt="Project Banner">
+    </a>
+  <br />
 
-A modern e-commerce application built with Next.js 15, TypeScript, TailwindCSS, Better Auth, Neon PostgreSQL, Drizzle ORM, and Zustand.
+  <div>
+    <img src="https://img.shields.io/badge/-TypeScript-black?style=for-the-badge&logoColor=white&logo=typescript&color=3178C6"/>
+    <img alt="Static Badge" src="https://img.shields.io/badge/Devin AI-FFF?style=for-the-badge&logo=devin&logoColor=white">
+    <img src="https://img.shields.io/badge/-Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" />
+    <br/>
+    <img src="https://img.shields.io/badge/Next.js-000?style=for-the-badge&logo=next.js&logoColor=white">
+    <img src="https://img.shields.io/badge/-Better Auth-black?style=for-the-badge&logoColor=white&logo=betterauth&color=black"/>
+    <img src="https://img.shields.io/badge/-Drizzle-black?style=for-the-badge&logoColor=C5F74F&logo=drizzle&color=black"/>
 
-## 🚀 Tech Stack
+  </div>
 
-- **Framework**: Next.js 15 with App Router
-- **Language**: TypeScript
-- **Styling**: TailwindCSS
-- **Authentication**: Better Auth
-- **Database**: Neon PostgreSQL
-- **ORM**: Drizzle ORM
-- **State Management**: Zustand
-- **Linting**: ESLint
+  <h3 align="center">Nike Ecommerce w/ Devin AI</h3>
 
-## 📦 Features
+   <div align="center">
+     Build this project step by step with our detailed tutorial on <a href="https://www.youtube.com/watch?v=XUkNR-JfHwo" target="_blank"><b>JavaScript Mastery</b></a> YouTube. Join the JSM family!
+    </div>
+</div>
 
-- ✅ Modern Next.js 15 with App Router
-- ✅ TypeScript for type safety
-- ✅ TailwindCSS for styling
-- ✅ Better Auth for authentication (email/password + OAuth)
-- ✅ Neon PostgreSQL database
-- ✅ Drizzle ORM for type-safe database queries
-- ✅ Zustand for state management
-- ✅ ESLint for code quality
-- ✅ Database schema for users, products, orders, and cart
+## 📋 <a name="table">Table of Contents</a>
 
-## 🛠️ Setup Instructions
+1. ✨ [Introduction](#introduction)
+2. ⚙️ [Tech Stack](#tech-stack)
+3. 🔋 [Features](#features)
+4. 🤸 [Quick Start](#quick-start)
+5. 🔗 [Assets](#links)
+6. 🚀 [More](#more)
 
-### 1. Install Dependencies
+## 🚨 Tutorial
+
+This repository contains the code corresponding to an in-depth tutorial available on our YouTube channel, <a href="" target="_blank"><b>JavaScript Mastery</b></a>.
+
+If you prefer visual learning, this is the perfect resource for you. Follow our tutorial to learn how to build projects like these step-by-step in a beginner-friendly manner!
+
+<a href="https://www.youtube.com/watch?v=iYOz165wGkQ" target="_blank"><img src="https://github.com/sujatagunale/EasyRead/assets/151519281/1736fca5-a031-4854-8c09-bc110e3bc16d" /></a>
+
+## <a name="introduction">✨ Introduction</a>
+
+Nike-style eCommerce built with Devin AI, Next.js, Drizzle ORM, and Better Auth. In this project, you’ll master prompting as Devin helps generate sleek product pages powered by Next.js 15, TypeScript, and TailwindCSS. The backend runs on Neon PostgreSQL with Drizzle ORM, authentication is handled with Better Auth, and Zustand manages state — all packaged in a clean, modular UI to help you ship faster.
+
+If you're getting started and need assistance or face any bugs, join our active Discord community with over **50k+** members. It's a place where people help each other out.
+
+<a href="https://discord.com/invite/n6EdbFJ" target="_blank"><img src="https://github.com/sujatagunale/EasyRead/assets/151519281/618f4872-1e10-42da-8213-1d69e486d02e" /></a>
+
+## <a name="tech-stack">⚙️ Tech Stack</a>
+
+- **[Better Auth](https://www.better-auth.com/)** is a framework-agnostic authentication and authorization library for TypeScript. It provides built-in support for email and password authentication, social sign-on (Google, GitHub, Apple, and more), and multi-factor authentication, simplifying user authentication and account management.
+
+- **[Devin AI](https://docs.devin.ai/get-started/devin-intro)** is an autonomous AI software engineer by Cognition Labs that independently plans, writes, debugs, and deploys full applications from natural language prompts. It integrates with tools like Slack, Linear, and Jira to manage tasks and pull requests, and learns new technologies on the fly by reading documentation.
+
+- **[Drizzle ORM](https://orm.drizzle.team/)** is a lightweight and performant TypeScript ORM designed with developer experience in mind. It provides a seamless interface between application code and database operations while maintaining high performance and reliability.
+
+- **[Neon](https://neon.com/)** is a fully managed, serverless PostgreSQL database platform. It offers features like instant provisioning, autoscaling, and database branching, enabling developers to build scalable applications without managing infrastructure.
+
+- **[Next.js](https://nextjs.org/docs)** is a powerful React framework for building full-stack web applications. It simplifies development with features like server-side rendering, static site generation, and API routes, enabling developers to focus on building products and shipping quickly.
+
+- **[TailwindCSS](https://tailwindcss.com/)** is a utility-first CSS framework that allows developers to build custom, responsive designs quickly without leaving their HTML. It provides pre-defined classes for layout, typography, colors, and more.
+
+- **[TypeScript](https://www.typescriptlang.org/)** is a superset of JavaScript that adds static typing, providing better tooling, code quality, and error detection for developers. It is ideal for building large-scale applications and enhances the development experience.
+
+- **[Zustand](https://zustand-demo.pmnd.rs)** is a minimal, hook-based state management library for React. It lets you manage global state with zero boilerplate, no context providers, and excellent performance through selective state subscriptions.
+
+## <a name="features">🔋 Features</a>
+
+👉 **Landing Page**: A fast, engaging homepage that introduces your brand and products with smooth animations and clear calls to action.
+
+👉 **Product Listing Page**: Browse all products with filters, sorting, and real-time availability—powered by Devin AI-generated content for dynamic updates.
+
+👉 **Product Details Page**: Detailed product info, images, and reviews with AI-enhanced descriptions to help customers make confident buying decisions.
+
+👉 **Auth Pages**: Secure and seamless user signup, login, and password recovery using Better Auth, ensuring smooth access without backend hassles.
+
+And many more, including code architecture and reusability.
+
+## <a name="quick-start">🤸 Quick Start</a>
+
+Follow these steps to set up the project locally on your machine.
+
+**Prerequisites**
+
+Make sure you have the following installed on your machine:
+
+- [Git](https://git-scm.com/)
+- [Node.js](https://nodejs.org/en)
+- [npm](https://www.npmjs.com/) (Node Package Manager)
+
+**Cloning the Repository**
+
+```bash
+git clone https://github.com/JavaScript-Mastery-Pro/e-commerce.git
+cd e-commerce
+```
+
+**Installation**
+
+Install the project dependencies using npm:
 
 ```bash
 npm install
 ```
 
-### 2. Environment Variables
+**Set Up Environment Variables**
 
-Copy the example environment file and fill in your credentials:
-
-```bash
-cp .env.example .env
-```
-
-Fill in the following variables in your `.env` file:
+Create a new file named `.env` in the root of your project and add the following content:
 
 ```env
 # Database
@@ -60,28 +126,15 @@ GOOGLE_CLIENT_ID=""
 GOOGLE_CLIENT_SECRET=""
 ```
 
-### 3. Database Setup
+Replace the placeholder values with your credentials. You can get these by signing up at: [**NeonDB**](https://neon.com/), [**Better-Auth**](https://www.better-auth.com/).
 
-Create your database tables:
-
-```bash
-npm run db:push
-```
-
-Or generate and run migrations:
-
-```bash
-npm run db:generate
-npm run db:migrate
-```
-
-### 4. Run the Development Server
+**Running the Project**
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see your application.
+Open [http://localhost:3000](http://localhost:3000) in your browser to view the project.
 
 ## 📁 Project Structure
 
@@ -113,58 +166,21 @@ The application includes the following tables:
 - **orders**: Customer orders
 - **order_items**: Individual items in orders
 
-## 🔧 Available Scripts
+## <a name="links">🔗 Assets</a>
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run db:generate` - Generate database migrations
-- `npm run db:migrate` - Run database migrations
-- `npm run db:push` - Push schema changes to database
-- `npm run db:studio` - Open Drizzle Studio
+Assets and snippets used in the project can be found in the **[video kit](https://jsm.dev/devin-kit)**.
 
-## 🔐 Authentication
+<a href="https://jsm.dev/nikecom-kit" target="_blank">
+  <img src="public/readme/videokit.webp" alt="Video Kit Banner">
+</a>
 
-The app uses Better Auth with support for:
+## <a name="more">🚀 More</a>
 
-- Email/password authentication
-- GitHub OAuth (optional)
-- Google OAuth (optional)
-- Session management
-- Email verification
+**Advance your skills with Next.js Pro Course**
 
-## 🛒 State Management
+Enjoyed creating this project? Dive deeper into our PRO courses for a richer learning adventure. They're packed with
+detailed explanations, cool features, and exercises to boost your skills. Give it a go!
 
-Zustand stores are configured for:
-
-- **Authentication**: User login state and profile
-- **Shopping Cart**: Cart items, quantities, and totals
-
-## 📝 Next Steps
-
-1. Set up your Neon PostgreSQL database
-2. Configure your OAuth providers (optional)
-3. Customize the UI and add your branding
-4. Implement product management
-5. Add payment processing
-6. Deploy to your preferred platform
-
-## 🚀 Deployment
-
-This app can be deployed to:
-
-- Vercel (recommended for Next.js)
-- Netlify
-- Railway
-- Any platform supporting Node.js
-
-Make sure to set your environment variables in your deployment platform.
-
-## 📚 Learn More
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Better Auth Documentation](https://better-auth.com)
-- [Drizzle ORM Documentation](https://orm.drizzle.team)
-- [TailwindCSS Documentation](https://tailwindcss.com/docs)
-- [Zustand Documentation](https://zustand-demo.pmnd.rs)
+<a href="https://jsm.dev/nikecom-jsmpro" target="_blank">
+  <img src="public/readme/jsmpro.webp" alt="Project Banner">
+</a>
