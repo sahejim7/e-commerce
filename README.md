@@ -1,6 +1,6 @@
 <div align="center">
   <br />
-    <a href="" target="_blank">
+    <a href="https://youtu.be/fZdTYswuZjU" target="_blank">
       <img src="public/readme/hero.webp" alt="Project Banner">
     </a>
   <br />
@@ -38,7 +38,7 @@ This repository contains the code corresponding to an in-depth tutorial availabl
 
 If you prefer visual learning, this is the perfect resource for you. Follow our tutorial to learn how to build projects like these step-by-step in a beginner-friendly manner!
 
-<a href="https://www.youtube.com/watch?v=iYOz165wGkQ" target="_blank"><img src="https://github.com/sujatagunale/EasyRead/assets/151519281/1736fca5-a031-4854-8c09-bc110e3bc16d" /></a>
+<a href="https://youtu.be/fZdTYswuZjU" target="_blank"><img src="https://github.com/sujatagunale/EasyRead/assets/151519281/1736fca5-a031-4854-8c09-bc110e3bc16d" /></a>
 
 ## <a name="introduction">✨ Introduction</a>
 
@@ -168,7 +168,7 @@ The application includes the following tables:
 
 ## <a name="links">🔗 Assets</a>
 
-Assets and snippets used in the project can be found in the **[video kit](https://jsm.dev/devin-kit)**.
+Assets and snippets used in the project can be found in the **[video kit](https://jsm.dev/nikecom-kit)**.
 
 <a href="https://jsm.dev/nikecom-kit" target="_blank">
   <img src="public/readme/videokit.webp" alt="Video Kit Banner">
