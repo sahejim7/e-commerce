@@ -4,7 +4,7 @@ import {cookies, headers} from "next/headers";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { guests } from "@/lib/db/schema/index";
+import { guests, users } from "@/lib/db/schema/index";
 import { and, eq, lt } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -94,15 +94,26 @@ export async function signIn(formData: FormData) {
 
   const data = signInSchema.parse(rawData);
 
-  const res = await auth.api.signInEmail({
-    body: {
-      email: data.email,
-      password: data.password,
-    },
-  });
+  try {
+    const res = await auth.api.signInEmail({
+      body: {
+        email: data.email,
+        password: data.password,
+      },
+    });
 
-  await migrateGuestToUser();
-  return { ok: true, userId: res.user?.id };
+    console.log('Sign-in response:', { success: !!res.user, userId: res.user?.id });
+
+    if (res.user) {
+      await migrateGuestToUser();
+      return { ok: true, userId: res.user.id };
+    } else {
+      return { ok: false, error: 'Invalid email or password' };
+    }
+  } catch (error) {
+    console.error('Sign-in error:', error);
+    return { ok: false, error: 'Invalid email or password' };
+  }
 }
 
 export async function getCurrentUser() {
@@ -111,9 +122,20 @@ export async function getCurrentUser() {
       headers: await headers()
     })
 
-    return session?.user ?? null;
+    if (!session?.user) {
+      return null;
+    }
+
+    // Fetch the full user data from database to get isAdmin field
+    const fullUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, session.user.id))
+      .limit(1);
+
+    return fullUser[0] ?? null;
   } catch (e) {
-    console.log(e);
+    console.log('getCurrentUser error:', e);
     return null;
   }
 }

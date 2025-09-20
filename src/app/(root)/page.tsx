@@ -1,71 +1,56 @@
 import React from "react";
-import { Card } from "@/components";
-import {getCurrentUser} from "@/lib/auth/actions";
+import { HeroSection, NewArrivals, CategoryGrid, NewsletterSignUp } from "@/components/landing";
+import { LandingFooter, Footer } from "@/components";
+import type { Metadata } from "next";
 
-const products = [
-  {
-    id: 1,
-    title: "Air Max Pulse",
-    subtitle: "Men's Shoes",
-    meta: "6 Colour",
-    price: 149.99,
-    imageSrc: "/shoes/shoe-1.jpg",
-    badge: { label: "New", tone: "orange" as const },
+export const metadata: Metadata = {
+  title: "Discover the Latest Trends in Fashion",
+  description: "The best fashion is only here - Explore SecretLace's curated collection of premium clothing and apparel. Discover the latest trends in fashion with our exclusive designs.",
+  keywords: ["fashion trends", "latest fashion", "premium clothing", "style", "apparel", "SecretLace"],
+  openGraph: {
+    title: "Discover the Latest Trends in Fashion",
+    description: "The best fashion is only here - Explore SecretLace's curated collection of premium clothing and apparel. Discover the latest trends in fashion with our exclusive designs.",
+    url: "https://secretlace.shop",
+    siteName: "SecretLace",
+    images: [
+      {
+        url: "https://secretlace.shop/hero-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "SecretLace - Discover the Latest Trends in Fashion",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
   },
-  {
-    id: 2,
-    title: "Air Zoom Pegasus",
-    subtitle: "Men's Shoes",
-    meta: "4 Colour",
-    price: 129.99,
-    imageSrc: "/shoes/shoe-2.webp",
-    badge: { label: "Hot", tone: "red" as const },
+  twitter: {
+    card: "summary_large_image",
+    title: "Discover the Latest Trends in Fashion",
+    description: "The best fashion is only here - Explore SecretLace's curated collection of premium clothing and apparel.",
+    images: ["https://secretlace.shop/hero-image.jpg"],
   },
-  {
-    id: 3,
-    title: "InfinityRN 4",
-    subtitle: "Men's Shoes",
-    meta: "6 Colour",
-    price: 159.99,
-    imageSrc: "/shoes/shoe-3.webp",
-    badge: { label: "Trending", tone: "green" as const },
-  },
-  {
-    id: 4,
-    title: "Metcon 9",
-    subtitle: "Men's Shoes",
-    meta: "3 Colour",
-    price: 139.99,
-    imageSrc: "/shoes/shoe-4.webp",
-  },
-];
+};
 
 const Home = async () => {
-  const user = await getCurrentUser();
-
-  console.log('USER:', user);
-
   return (
-    <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <section aria-labelledby="latest" className="pb-12">
-        <h2 id="latest" className="mb-6 text-heading-3 text-dark-900">
-          Latest shoes
-        </h2>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((p) => (
-            <Card
-              key={p.id}
-              title={p.title}
-              subtitle={p.subtitle}
-              meta={p.meta}
-              imageSrc={p.imageSrc}
-              price={p.price}
-              badge={p.badge}
-              href={`/products/${p.id}`}
-            />
-          ))}
-        </div>
-      </section>
+    <main className="w-full">
+      {/* Hero Section */}
+      <HeroSection />
+      
+      {/* New Arrivals Section */}
+      <NewArrivals />
+      
+      {/* Category Grid Section */}
+      <CategoryGrid />
+      
+      {/* Newsletter Sign-up Section */}
+      <NewsletterSignUp />
+      
+      {/* Landing Page Footer */}
+      <LandingFooter />
+      
+      {/* Global Footer */}
+      <Footer />
     </main>
   );
 };

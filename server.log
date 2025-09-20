@@ -1,0 +1,30 @@
+
+> e-commerce@0.1.0 dev
+> next dev --turbopack
+
+   ▲ Next.js 15.4.6 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://10.128.0.51:3000
+   - Environments: .env.local, .env
+   - Experiments (use with caution):
+     · serverActions
+
+ ✓ Starting...
+ ✓ Ready in 1449ms
+ ○ Compiling /admin/products ...
+ ✓ Compiled /admin/products in 6.6s
+[dotenv@17.2.1] injecting env (0) from .env.local -- tip: ⚙️  override existing env vars with { override: true }
+Admin Layout - User: null
+Admin Layout - No user, redirecting to sign-in
+ GET /admin/products 307 in 7878ms
+ ✓ Compiled in 148ms
+ ✓ Compiled in 82ms
+ ✓ Compiled /admin/products in 52ms
+[dotenv@17.2.1] injecting env (0) from .env.local -- tip: ⚙️  write to custom object with { processEnv: myObject }
+getCurrentUser - session: null
+getCurrentUser - no session user
+ GET /admin/products 307 in 1082ms
+ ✓ Compiled in 48ms
+ ✓ Compiled /admin/products in 30ms
+[dotenv@17.2.1] injecting env (0) from .env.local -- tip: ⚙️  suppress all logs with { quiet: true }
+ GET /admin/products 307 in 369ms

@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, uuid, boolean } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { z } from 'zod';
 import { products } from './products';
@@ -7,6 +7,9 @@ export const collections = pgTable('collections', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
+  description: text('description'),
+  isFeatured: boolean('is_featured').notNull().default(false),
+  imageUrl: text('image_url'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -34,6 +37,9 @@ export const productCollectionsRelations = relations(productCollections, ({ one 
 export const insertCollectionSchema = z.object({
   name: z.string().min(1),
   slug: z.string().min(1),
+  description: z.string().nullable().optional(),
+  isFeatured: z.boolean().optional().default(false),
+  imageUrl: z.string().nullable().optional(),
   createdAt: z.date().optional(),
 });
 export const selectCollectionSchema = insertCollectionSchema.extend({

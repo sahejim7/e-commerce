@@ -1,18 +1,21 @@
 import { db } from '@/lib/db';
 import {
-  genders, colors, sizes, brands, categories, collections, productCollections,
+  genders, brands, categories, collections, productCollections,
   products, productVariants, productImages,
-  insertGenderSchema, insertColorSchema, insertSizeSchema, insertBrandSchema,
-  insertCategorySchema, insertCollectionSchema, insertProductSchema, insertVariantSchema, insertProductImageSchema,
+  productTypes, attributes, attributeValues, productTypeAttributes, variantAttributeValues,
+  insertGenderSchema, insertBrandSchema, insertCategorySchema, insertCollectionSchema, 
+  insertProductSchema, insertVariantSchema, insertProductImageSchema,
+  insertProductTypeSchema, insertAttributeSchema, insertAttributeValueSchema,
+  insertProductTypeAttributeSchema, insertVariantAttributeValueSchema,
   type InsertProduct, type InsertVariant, type InsertProductImage,
+  type InsertProductType, type InsertAttribute, type InsertAttributeValue,
+  type InsertProductTypeAttribute, type InsertVariantAttributeValue,
 } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { mkdirSync, existsSync, cpSync } from 'fs';
 import { join, basename } from 'path';
 type ProductRow = typeof products.$inferSelect;
 type VariantRow = typeof productVariants.$inferSelect;
-
-type RGBHex = `#${string}`;
 
 const log = (...args: unknown[]) => console.log('[seed]', ...args);
 const err = (...args: unknown[]) => console.error('[seed:error]', ...args);
@@ -31,10 +34,33 @@ function randInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// Helper function to generate all possible combinations of attribute values
+function generateVariantCombinations(attributeValueGroups: Record<string, string[]>) {
+  const attributes = Object.keys(attributeValueGroups);
+  const combinations: Record<string, string>[] = [];
+  
+  function generateRecursive(index: number, current: Record<string, string>) {
+    if (index === attributes.length) {
+      combinations.push({ ...current });
+      return;
+    }
+    
+    const attribute = attributes[index];
+    const values = attributeValueGroups[attribute];
+    
+    for (const value of values) {
+      current[attribute] = value;
+      generateRecursive(index + 1, current);
+    }
+  }
+  
+  generateRecursive(0, {});
+  return combinations;
+}
+
 async function seed() {
   try {
-    log('Seeding filters: genders, colors, sizes');
-
+    log('Seeding genders');
     const genderRows = [
       insertGenderSchema.parse({ label: 'Men', slug: 'men' }),
       insertGenderSchema.parse({ label: 'Women', slug: 'women' }),
@@ -45,30 +71,104 @@ async function seed() {
       if (!exists.length) await db.insert(genders).values(row);
     }
 
-    const colorRows = [
-      { name: 'Black', slug: 'black', hexCode: '#000000' as RGBHex },
-      { name: 'White', slug: 'white', hexCode: '#FFFFFF' as RGBHex },
-      { name: 'Red', slug: 'red', hexCode: '#FF0000' as RGBHex },
-      { name: 'Blue', slug: 'blue', hexCode: '#1E3A8A' as RGBHex },
-      { name: 'Green', slug: 'green', hexCode: '#10B981' as RGBHex },
-      { name: 'Gray', slug: 'gray', hexCode: '#6B7280' as RGBHex },
-    ].map((c) => insertColorSchema.parse(c));
-    for (const row of colorRows) {
-      const exists = await db.select().from(colors).where(eq(colors.slug, row.slug)).limit(1);
-      if (!exists.length) await db.insert(colors).values(row);
+    log('Seeding product types and attributes');
+    
+    // Create product types
+    const productTypeRows = [
+      insertProductTypeSchema.parse({ name: 'T-Shirt' }),
+      insertProductTypeSchema.parse({ name: 'Pants' }),
+      insertProductTypeSchema.parse({ name: 'Jacket' }),
+    ];
+    for (const row of productTypeRows) {
+      const exists = await db.select().from(productTypes).where(eq(productTypes.name, row.name)).limit(1);
+      if (!exists.length) await db.insert(productTypes).values(row);
     }
 
-    const sizeRows = [
-      { name: '7', slug: '7', sortOrder: 0 },
-      { name: '8', slug: '8', sortOrder: 1 },
-      { name: '9', slug: '9', sortOrder: 2 },
-      { name: '10', slug: '10', sortOrder: 3 },
-      { name: '11', slug: '11', sortOrder: 4 },
-      { name: '12', slug: '12', sortOrder: 5 },
-    ].map((s) => insertSizeSchema.parse(s));
-    for (const row of sizeRows) {
-      const exists = await db.select().from(sizes).where(eq(sizes.slug, row.slug)).limit(1);
-      if (!exists.length) await db.insert(sizes).values(row);
+    // Create attributes
+    const attributeRows = [
+      insertAttributeSchema.parse({ name: 'color', displayName: 'Color' }),
+      insertAttributeSchema.parse({ name: 'apparel_size', displayName: 'Apparel Size' }),
+      insertAttributeSchema.parse({ name: 'waist_size', displayName: 'Waist Size' }),
+    ];
+    for (const row of attributeRows) {
+      const exists = await db.select().from(attributes).where(eq(attributes.name, row.name)).limit(1);
+      if (!exists.length) await db.insert(attributes).values(row);
+    }
+
+    // Get the inserted records to use their IDs
+    const allProductTypes = await db.select().from(productTypes);
+    const allAttributes = await db.select().from(attributes);
+    
+    const tshirtType = allProductTypes.find(pt => pt.name === 'T-Shirt')!;
+    const pantsType = allProductTypes.find(pt => pt.name === 'Pants')!;
+    const jacketType = allProductTypes.find(pt => pt.name === 'Jacket')!;
+    
+    const colorAttribute = allAttributes.find(a => a.name === 'color')!;
+    const apparelSizeAttribute = allAttributes.find(a => a.name === 'apparel_size')!;
+    const waistSizeAttribute = allAttributes.find(a => a.name === 'waist_size')!;
+
+    // Create attribute values
+    const attributeValueRows = [
+      // Color values
+      insertAttributeValueSchema.parse({ attributeId: colorAttribute.id, value: 'Black', sortOrder: 0 }),
+      insertAttributeValueSchema.parse({ attributeId: colorAttribute.id, value: 'White', sortOrder: 1 }),
+      insertAttributeValueSchema.parse({ attributeId: colorAttribute.id, value: 'Red', sortOrder: 2 }),
+      insertAttributeValueSchema.parse({ attributeId: colorAttribute.id, value: 'Blue', sortOrder: 3 }),
+      insertAttributeValueSchema.parse({ attributeId: colorAttribute.id, value: 'Green', sortOrder: 4 }),
+      insertAttributeValueSchema.parse({ attributeId: colorAttribute.id, value: 'Gray', sortOrder: 5 }),
+      
+      // Apparel size values
+      insertAttributeValueSchema.parse({ attributeId: apparelSizeAttribute.id, value: 'XS', sortOrder: 0 }),
+      insertAttributeValueSchema.parse({ attributeId: apparelSizeAttribute.id, value: 'S', sortOrder: 1 }),
+      insertAttributeValueSchema.parse({ attributeId: apparelSizeAttribute.id, value: 'M', sortOrder: 2 }),
+      insertAttributeValueSchema.parse({ attributeId: apparelSizeAttribute.id, value: 'L', sortOrder: 3 }),
+      insertAttributeValueSchema.parse({ attributeId: apparelSizeAttribute.id, value: 'XL', sortOrder: 4 }),
+      insertAttributeValueSchema.parse({ attributeId: apparelSizeAttribute.id, value: 'XXL', sortOrder: 5 }),
+      
+      // Waist size values
+      insertAttributeValueSchema.parse({ attributeId: waistSizeAttribute.id, value: '28', sortOrder: 0 }),
+      insertAttributeValueSchema.parse({ attributeId: waistSizeAttribute.id, value: '30', sortOrder: 1 }),
+      insertAttributeValueSchema.parse({ attributeId: waistSizeAttribute.id, value: '32', sortOrder: 2 }),
+      insertAttributeValueSchema.parse({ attributeId: waistSizeAttribute.id, value: '34', sortOrder: 3 }),
+      insertAttributeValueSchema.parse({ attributeId: waistSizeAttribute.id, value: '36', sortOrder: 4 }),
+      insertAttributeValueSchema.parse({ attributeId: waistSizeAttribute.id, value: '38', sortOrder: 5 }),
+    ];
+    
+    for (const row of attributeValueRows) {
+      const exists = await db.select()
+        .from(attributeValues)
+        .where(and(
+          eq(attributeValues.attributeId, row.attributeId),
+          eq(attributeValues.value, row.value)
+        ))
+        .limit(1);
+      if (!exists.length) await db.insert(attributeValues).values(row);
+    }
+
+    // Link product types to their attributes
+    const productTypeAttributeRows = [
+      // T-Shirt uses color and apparel_size
+      insertProductTypeAttributeSchema.parse({ productTypeId: tshirtType.id, attributeId: colorAttribute.id }),
+      insertProductTypeAttributeSchema.parse({ productTypeId: tshirtType.id, attributeId: apparelSizeAttribute.id }),
+      
+      // Pants uses color and waist_size
+      insertProductTypeAttributeSchema.parse({ productTypeId: pantsType.id, attributeId: colorAttribute.id }),
+      insertProductTypeAttributeSchema.parse({ productTypeId: pantsType.id, attributeId: waistSizeAttribute.id }),
+      
+      // Jacket uses color and apparel_size
+      insertProductTypeAttributeSchema.parse({ productTypeId: jacketType.id, attributeId: colorAttribute.id }),
+      insertProductTypeAttributeSchema.parse({ productTypeId: jacketType.id, attributeId: apparelSizeAttribute.id }),
+    ];
+    
+    for (const row of productTypeAttributeRows) {
+      const exists = await db.select()
+        .from(productTypeAttributes)
+        .where(and(
+          eq(productTypeAttributes.productTypeId, row.productTypeId),
+          eq(productTypeAttributes.attributeId, row.attributeId)
+        ))
+        .limit(1);
+      if (!exists.length) await db.insert(productTypeAttributes).values(row);
     }
 
     log('Seeding brand: Nike');
@@ -78,96 +178,205 @@ async function seed() {
       if (!exists.length) await db.insert(brands).values(brand);
     }
 
-    log('Seeding categories');
-    const catRows = [
-      { name: 'Shoes', slug: 'shoes', parentId: null },
-      { name: 'Running Shoes', slug: 'running-shoes', parentId: null },
-      { name: 'Lifestyle', slug: 'lifestyle', parentId: null },
+    log('Seeding categories (primary classifications for filtering)');
+    const categoryRows = [
+      { name: 'Tops', slug: 'tops', parentId: null, imageUrl: null },
+      { name: 'Bottoms', slug: 'bottoms', parentId: null, imageUrl: null },
+      { name: 'Outerwear', slug: 'outerwear', parentId: null, imageUrl: null },
+      { name: 'Accessories', slug: 'accessories', parentId: null, imageUrl: null },
     ].map((c) => insertCategorySchema.parse(c));
-    for (const row of catRows) {
+    for (const row of categoryRows) {
       const exists = await db.select().from(categories).where(eq(categories.slug, row.slug)).limit(1);
       if (!exists.length) await db.insert(categories).values(row);
     }
 
-    log('Seeding collections');
+    log('Seeding collections (marketing groups for discovery)');
     const collectionRows = [
-      insertCollectionSchema.parse({ name: "Summer '25", slug: 'summer-25' }),
-      insertCollectionSchema.parse({ name: 'New Arrivals', slug: 'new-arrivals' }),
-    ];
+      { 
+        name: 'Best Sellers', 
+        slug: 'best-sellers', 
+        isFeatured: true,
+        description: 'Discover our most popular and highly-rated products that customers love.',
+        imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'
+      },
+      { 
+        name: 'Essentials Collection', 
+        slug: 'essentials-collection', 
+        isFeatured: true,
+        description: 'The must-have pieces for every wardrobe - timeless, versatile, and always in style.',
+        imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'
+      },
+      { 
+        name: 'Linen & Tropical Wear', 
+        slug: 'linen-tropical-wear', 
+        isFeatured: true,
+        description: 'Light, breathable fabrics perfect for warm weather and tropical destinations.',
+        imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'
+      },
+      { 
+        name: 'Matching Sets', 
+        slug: 'matching-sets', 
+        isFeatured: true,
+        description: 'Coordinated outfits that take the guesswork out of getting dressed.',
+        imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'
+      },
+      { 
+        name: "Men's Smart Casual", 
+        slug: 'mens-smart-casual', 
+        isFeatured: true,
+        description: 'Sophisticated yet comfortable pieces for the modern gentleman.',
+        imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'
+      },
+      { 
+        name: "Women's Lounge & Comfort", 
+        slug: 'womens-lounge-comfort', 
+        isFeatured: true,
+        description: 'Cozy, comfortable pieces designed for relaxation and everyday wear.',
+        imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.3&auto=format&fit=crop&w=2070&q=80'
+      },
+    ].map((c) => insertCollectionSchema.parse(c));
     for (const row of collectionRows) {
       const exists = await db.select().from(collections).where(eq(collections.slug, row.slug)).limit(1);
       if (!exists.length) await db.insert(collections).values(row);
     }
 
+    // Get all the seeded data for product creation
     const allGenders = await db.select().from(genders);
-    const allColors = await db.select().from(colors);
-    const allSizes = await db.select().from(sizes);
+    const allAttributeValues = await db.select().from(attributeValues);
     const nike = (await db.select().from(brands).where(eq(brands.slug, 'nike')))[0];
-    const shoesCat = (await db.select().from(categories).where(eq(categories.slug, 'shoes')))[0];
-    const runningCat = (await db.select().from(categories).where(eq(categories.slug, 'running-shoes')))[0];
-    const lifestyleCat = (await db.select().from(categories).where(eq(categories.slug, 'lifestyle')))[0];
-    const summer = (await db.select().from(collections).where(eq(collections.slug, 'summer-25')))[0];
-    const newArrivals = (await db.select().from(collections).where(eq(collections.slug, 'new-arrivals')))[0];
+    
+    // Get categories for product classification
+    const topsCat = (await db.select().from(categories).where(eq(categories.slug, 'tops')))[0];
+    const outerwearCat = (await db.select().from(categories).where(eq(categories.slug, 'outerwear')))[0];
+    const bottomsCat = (await db.select().from(categories).where(eq(categories.slug, 'bottoms')))[0];
+    const accessoriesCat = (await db.select().from(categories).where(eq(categories.slug, 'accessories')))[0];
+    
+    // Get collections for marketing assignment
+    const allCollections = await db.select().from(collections);
+    const bestSellers = allCollections.find(c => c.slug === 'best-sellers');
+    const essentials = allCollections.find(c => c.slug === 'essentials-collection');
+    const linenTropical = allCollections.find(c => c.slug === 'linen-tropical-wear');
+    const matchingSets = allCollections.find(c => c.slug === 'matching-sets');
+    const mensSmartCasual = allCollections.find(c => c.slug === 'mens-smart-casual');
+    const womensLounge = allCollections.find(c => c.slug === 'womens-lounge-comfort');
 
-    const uploadsRoot = join(process.cwd(), 'static', 'uploads', 'shoes');
+    // Group attribute values by attribute
+    const colorValues = allAttributeValues.filter(av => av.attributeId === colorAttribute.id);
+    const apparelSizeValues = allAttributeValues.filter(av => av.attributeId === apparelSizeAttribute.id);
+    const waistSizeValues = allAttributeValues.filter(av => av.attributeId === waistSizeAttribute.id);
+
+    const uploadsRoot = join(process.cwd(), 'static', 'uploads', 'clothing');
     if (!existsSync(uploadsRoot)) {
       mkdirSync(uploadsRoot, { recursive: true });
     }
 
-    const sourceDir = join(process.cwd(), 'public', 'shoes');
-    const productNames = Array.from({ length: 15 }, (_, i) => `Nike Air Max ${i + 1}`);
+    const sourceDir = join(process.cwd(), 'public', 'clothing');
+    const productNames = [
+      'Graphic Tee', 'Denim Jacket', 'Hoodie', 'Cargo Pants', 'Tank Top',
+      'Bomber Jacket', 'Sweatpants', 'Polo Shirt', 'Windbreaker', 'Shorts',
+      'Cardigan', 'Jeans', 'T-Shirt', 'Blazer', 'Joggers'
+    ];
 
     const sourceImages = [
-      'shoe-1.jpg','shoe-2.webp','shoe-3.webp','shoe-4.webp','shoe-5.avif',
-      'shoe-6.avif','shoe-7.avif','shoe-8.avif','shoe-9.avif','shoe-10.avif',
-      'shoe-11.avif','shoe-12.avif','shoe-13.avif','shoe-14.avif','shoe-15.avif',
+      'clothing-1.jpg','clothing-2.webp','clothing-3.webp','clothing-4.webp','clothing-5.avif',
+      'clothing-6.avif','clothing-7.avif','clothing-8.avif','clothing-9.avif','clothing-10.avif',
+      'clothing-11.avif','clothing-12.avif','clothing-13.avif','clothing-14.avif','clothing-15.avif',
     ];
 
     log('Creating products with variants and images');
     for (let i = 0; i < productNames.length; i++) {
       const name = productNames[i];
       const gender = allGenders[randInt(0, allGenders.length - 1)];
-      const catPick = [shoesCat, runningCat, lifestyleCat][randInt(0, 2)];
-      const desc = `Experience comfort and performance with ${name}.`;
+      const desc = `Stylish and comfortable ${name} perfect for any occasion.`;
+
+      // Determine product type and category based on name
+      let productType = tshirtType; // default
+      let category = topsCat; // default
+      
+      if (name.toLowerCase().includes('pants') || name.toLowerCase().includes('jeans') || name.toLowerCase().includes('shorts') || name.toLowerCase().includes('joggers')) {
+        productType = pantsType;
+        category = bottomsCat;
+      } else if (name.toLowerCase().includes('jacket') || name.toLowerCase().includes('hoodie') || name.toLowerCase().includes('blazer') || name.toLowerCase().includes('cardigan') || name.toLowerCase().includes('windbreaker')) {
+        productType = jacketType;
+        category = outerwearCat;
+      } else if (name.toLowerCase().includes('tank') || name.toLowerCase().includes('tee') || name.toLowerCase().includes('shirt') || name.toLowerCase().includes('polo')) {
+        category = topsCat;
+      }
 
       const product = insertProductSchema.parse({
         name,
         description: desc,
-        categoryId: catPick?.id ?? null,
+        categoryId: category?.id ?? null,
         genderId: gender?.id ?? null,
         brandId: nike?.id ?? null,
+        productTypeId: productType.id,
         isPublished: true,
       });
 
       const retP = await db.insert(products).values(product as InsertProduct).returning();
       const insertedProduct = (retP as ProductRow[])[0];
-      const colorChoices = pick(allColors, randInt(2, Math.min(4, allColors.length)));
-      const sizeChoices = pick(allSizes, randInt(3, Math.min(6, allSizes.length)));
+
+      // Create variants based on product type
+      let variantCombinations: Record<string, string>[] = [];
+      
+      if (productType.id === tshirtType.id || productType.id === jacketType.id) {
+        // Use color and apparel_size
+        const selectedColors = pick(colorValues, randInt(2, Math.min(4, colorValues.length)));
+        const selectedSizes = pick(apparelSizeValues, randInt(3, Math.min(6, apparelSizeValues.length)));
+        
+        const attributeValueGroups = {
+          [colorAttribute.id]: selectedColors.map(c => c.id),
+          [apparelSizeAttribute.id]: selectedSizes.map(s => s.id),
+        };
+        variantCombinations = generateVariantCombinations(attributeValueGroups);
+      } else if (productType.id === pantsType.id) {
+        // Use color and waist_size
+        const selectedColors = pick(colorValues, randInt(2, Math.min(4, colorValues.length)));
+        const selectedWaistSizes = pick(waistSizeValues, randInt(3, Math.min(5, waistSizeValues.length)));
+        
+        const attributeValueGroups = {
+          [colorAttribute.id]: selectedColors.map(c => c.id),
+          [waistSizeAttribute.id]: selectedWaistSizes.map(w => w.id),
+        };
+        variantCombinations = generateVariantCombinations(attributeValueGroups);
+      }
 
       const variantIds: string[] = [];
       let defaultVariantId: string | null = null;
 
-      for (const color of colorChoices) {
-        for (const size of sizeChoices) {
-          const priceNum = Number((randInt(80, 200) + 0.99).toFixed(2));
-          const discountedNum = Math.random() < 0.3 ? Number((priceNum - randInt(5, 25)).toFixed(2)) : null;
-          const sku = `NIKE-${insertedProduct.id.slice(0, 8)}-${color.slug.toUpperCase()}-${size.slug.toUpperCase()}`;
-          const variant = insertVariantSchema.parse({
-            productId: insertedProduct.id,
-            sku,
-            price: priceNum.toFixed(2),
-            salePrice: discountedNum !== null ? discountedNum.toFixed(2) : undefined,
-            colorId: color.id,
-            sizeId: size.id,
-            inStock: randInt(5, 50),
-            weight: Number((Math.random() * 1 + 0.5).toFixed(2)),
-            dimensions: { length: 30, width: 20, height: 12 },
-          });
-          const retV = await db.insert(productVariants).values(variant as InsertVariant).returning();
-          const created = (retV as VariantRow[])[0];
-          variantIds.push(created.id);
-          if (!defaultVariantId) defaultVariantId = created.id;
+      for (const combination of variantCombinations) {
+        const priceNum = Number((randInt(80, 200) + 0.99).toFixed(2));
+        const discountedNum = Math.random() < 0.3 ? Number((priceNum - randInt(5, 25)).toFixed(2)) : null;
+        
+        // Create a descriptive SKU based on attribute values
+        const attributeValueIds = Object.values(combination);
+        const sku = `NIKE-${insertedProduct.id.slice(0, 8)}-${attributeValueIds.map(id => {
+          const av = allAttributeValues.find(a => a.id === id);
+          return av?.value.slice(0, 3).toUpperCase() || 'VAR';
+        }).join('-')}`;
+        
+        const variant = insertVariantSchema.parse({
+          productId: insertedProduct.id,
+          sku,
+          price: priceNum.toFixed(2),
+          salePrice: discountedNum !== null ? discountedNum.toFixed(2) : undefined,
+          inStock: randInt(5, 50),
+          weight: Number((Math.random() * 1 + 0.5).toFixed(2)),
+          dimensions: { length: 30, width: 20, height: 12 },
+        });
+        
+        const retV = await db.insert(productVariants).values(variant as InsertVariant).returning();
+        const created = (retV as VariantRow[])[0];
+        variantIds.push(created.id);
+        if (!defaultVariantId) defaultVariantId = created.id;
 
+        // Link variant to its attribute values
+        for (const [attributeId, attributeValueId] of Object.entries(combination)) {
+          const variantAttributeValue = insertVariantAttributeValueSchema.parse({
+            variantId: created.id,
+            attributeValueId,
+          });
+          await db.insert(variantAttributeValues).values(variantAttributeValue);
         }
       }
 
@@ -183,7 +392,7 @@ async function seed() {
         cpSync(src, dest);
         const img: InsertProductImage = insertProductImageSchema.parse({
           productId: insertedProduct.id,
-          url: `/static/uploads/shoes/${destName}`,
+          url: `/static/uploads/clothing/${destName}`,
           sortOrder: 0,
           isPrimary: true,
         });
@@ -192,15 +401,47 @@ async function seed() {
         err('Failed to copy product image', { src, dest, e });
       }
 
-      const collectionsForProduct: { id: string }[] = Math.random() < 0.5 ? [summer] : ([newArrivals, summer].filter(Boolean) as { id: string }[]);
+      // Assign products to collections based on logical marketing groupings
+      const collectionsForProduct: { id: string }[] = [];
+      
+      // All products have a chance to be in Best Sellers
+      if (Math.random() < 0.3) {
+        collectionsForProduct.push(bestSellers!);
+      }
+      
+      // Gender-specific collections
+      if (gender.slug === 'men' && Math.random() < 0.4) {
+        collectionsForProduct.push(mensSmartCasual!);
+      }
+      if (gender.slug === 'women' && Math.random() < 0.4) {
+        collectionsForProduct.push(womensLounge!);
+      }
+      
+      // Style-based collections
+      if (name.toLowerCase().includes('linen') || name.toLowerCase().includes('tropical') || Math.random() < 0.2) {
+        collectionsForProduct.push(linenTropical!);
+      }
+      
+      if (name.toLowerCase().includes('set') || name.toLowerCase().includes('matching') || Math.random() < 0.15) {
+        collectionsForProduct.push(matchingSets!);
+      }
+      
+      // Essentials for basic items
+      if (name.toLowerCase().includes('tee') || name.toLowerCase().includes('shirt') || name.toLowerCase().includes('pants') || Math.random() < 0.25) {
+        collectionsForProduct.push(essentials!);
+      }
+      
+      // Assign to collections
       for (const col of collectionsForProduct) {
-        await db.insert(productCollections).values({
-          productId: insertedProduct.id,
-          collectionId: col.id,
-        });
+        if (col) {
+          await db.insert(productCollections).values({
+            productId: insertedProduct.id,
+            collectionId: col.id,
+          });
+        }
       }
 
-      log(`Seeded product ${name} with ${variantIds.length} variants`);
+      log(`Seeded product ${name} (${productType.name}) with ${variantIds.length} variants`);
     }
 
     log('Seeding complete');
@@ -210,4 +451,4 @@ async function seed() {
   }
 }
 
-seed();
+// seed(); // Temporarily disabled to check current state

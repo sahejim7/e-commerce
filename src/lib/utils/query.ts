@@ -81,16 +81,18 @@ export function getStringParam(search: string, key: string): string | undefined 
 export type NormalizedProductFilters = {
   search?: string;
   genderSlugs: string[];
-  sizeSlugs: string[];
-  colorSlugs: string[];
   brandSlugs: string[];
   categorySlugs: string[];
+  attributeFilters: Record<string, string[]>; // Dynamic attribute filtering: { "color": ["red", "blue"], "apparel_size": ["S", "M"] }
   priceMin?: number;
   priceMax?: number;
   priceRanges: Array<[number | undefined, number | undefined]>;
   sort: "featured" | "newest" | "price_asc" | "price_desc";
   page: number;
   limit: number;
+  // Legacy support for backward compatibility
+  sizeSlugs: string[];
+  colorSlugs: string[];
 };
 
 export function parseFilterParams(sp: Record<string, string | string[] | undefined>): NormalizedProductFilters {
@@ -110,12 +112,45 @@ export function parseFilterParams(sp: Record<string, string | string[] | undefin
   const search = getStr("search")?.trim() || undefined;
 
   const genderSlugs = getArr("gender").map((s) => s.toLowerCase());
-  const sizeSlugs = getArr("size").map((s) => s.toLowerCase());
-  const colorSlugs = getArr("color").map((s) => s.toLowerCase());
   const brandSlugs = getArr("brand").map((s) => s.toLowerCase());
   const categorySlugs = getArr("category").map((s) => s.toLowerCase());
 
-  const priceRangesStr = getArr("price");
+  // Legacy support for backward compatibility
+  const sizeSlugs = getArr("size").map((s) => s.toLowerCase());
+  const colorSlugs = getArr("color").map((s) => s.toLowerCase());
+
+  // Build dynamic attribute filters from all parameters
+  const attributeFilters: Record<string, string[]> = {};
+  
+  // Process all parameters that could be attribute filters
+  Object.keys(sp).forEach(key => {
+    // Skip known non-attribute parameters
+    if (['search', 'gender', 'brand', 'category', 'size', 'color', 'price', 'priceMin', 'priceMax', 'sort', 'page', 'limit'].includes(key)) {
+      return;
+    }
+    
+    // Skip array notation parameters
+    if (key.endsWith('[]')) {
+      return;
+    }
+    
+    const values = getArr(key);
+    if (values.length > 0) {
+      attributeFilters[key] = values.map((s) => s.toLowerCase());
+    }
+  });
+
+  // Add legacy size and color filters to attribute filters if they exist
+  if (sizeSlugs.length > 0) {
+    attributeFilters['size'] = sizeSlugs;
+  }
+  if (colorSlugs.length > 0) {
+    attributeFilters['color'] = colorSlugs;
+  }
+
+  // Handle both single price range (from slider) and multiple price ranges (from checkboxes)
+  const priceParam = getStr("price");
+  const priceRangesStr = priceParam ? [priceParam] : getArr("price");
   const priceRanges: Array<[number | undefined, number | undefined]> = priceRangesStr
     .map((r) => {
       const [minStr, maxStr] = String(r).split("-");
@@ -144,16 +179,18 @@ export function parseFilterParams(sp: Record<string, string | string[] | undefin
   return {
     search,
     genderSlugs,
-    sizeSlugs,
-    colorSlugs,
     brandSlugs,
     categorySlugs,
+    attributeFilters,
     priceMin: priceMin !== undefined && !Number.isNaN(priceMin) ? priceMin : undefined,
     priceMax: priceMax !== undefined && !Number.isNaN(priceMax) ? priceMax : undefined,
     priceRanges,
     sort,
     page,
     limit,
+    // Legacy support for backward compatibility
+    sizeSlugs,
+    colorSlugs,
   };
 }
 

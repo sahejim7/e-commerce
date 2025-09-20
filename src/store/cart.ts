@@ -1,72 +1,126 @@
+"use client";
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image?: string;
-}
+import { getCart, type Cart, type CartItem } from '@/lib/actions/cartActions';
+import { addCartItem, updateCartItemQuantity, removeCartItem } from '@/lib/actions/cartClientActions';
 
 interface CartState {
-  items: CartItem[];
-  total: number;
-  addItem: (item: Omit<CartItem, 'quantity'>) => void;
-  removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  cart: Cart | null;
+  isLoading: boolean;
+  error: string | null;
+  
+  // Actions
+  initializeCart: () => Promise<void>;
+  addItem: (variantId: string, quantity?: number) => Promise<boolean>;
+  removeItem: (itemId: string) => Promise<boolean>;
+  updateItemQuantity: (itemId: string, quantity: number) => Promise<boolean>;
   clearCart: () => void;
+  
+  // Computed values
   getItemCount: () => number;
+  getTotal: () => number;
 }
 
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
-      items: [],
-      total: 0,
-      addItem: (item) => {
-        const items = get().items;
-        const existingItem = items.find((i) => i.id === item.id);
-        
-        if (existingItem) {
-          set({
-            items: items.map((i) =>
-              i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-            ),
-          });
-        } else {
-          set({
-            items: [...items, { ...item, quantity: 1 }],
-          });
+      cart: null,
+      isLoading: false,
+      error: null,
+
+      initializeCart: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const cart = await getCart();
+          set({ cart, isLoading: false });
+        } catch (error) {
+          console.error('Failed to initialize cart:', error);
+          set({ error: 'Failed to load cart', isLoading: false });
         }
-        
-        // Update total
-        const newItems = get().items;
-        const total = newItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        set({ total });
       },
-      removeItem: (id) => {
-        const items = get().items.filter((item) => item.id !== id);
-        const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        set({ items, total });
-      },
-      updateQuantity: (id, quantity) => {
-        if (quantity <= 0) {
-          get().removeItem(id);
-          return;
+
+      addItem: async (variantId: string, quantity = 1) => {
+        set({ isLoading: true, error: null });
+        try {
+          const result = await addCartItem(variantId, quantity);
+          
+          if (result.success) {
+            // Refresh cart data
+            const cart = await getCart();
+            set({ cart, isLoading: false });
+            return true;
+          } else {
+            set({ error: result.error || 'Failed to add item', isLoading: false });
+            return false;
+          }
+        } catch (error) {
+          console.error('Failed to add item to cart:', error);
+          set({ error: 'Failed to add item to cart', isLoading: false });
+          return false;
         }
-        
-        const items = get().items.map((item) =>
-          item.id === id ? { ...item, quantity } : item
-        );
-        const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        set({ items, total });
       },
-      clearCart: () => set({ items: [], total: 0 }),
-      getItemCount: () => get().items.reduce((sum, item) => sum + item.quantity, 0),
+
+      removeItem: async (itemId: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          const result = await removeCartItem(itemId);
+          
+          if (result.success) {
+            // Refresh cart data
+            const cart = await getCart();
+            set({ cart, isLoading: false });
+            return true;
+          } else {
+            set({ error: result.error || 'Failed to remove item', isLoading: false });
+            return false;
+          }
+        } catch (error) {
+          console.error('Failed to remove item from cart:', error);
+          set({ error: 'Failed to remove item from cart', isLoading: false });
+          return false;
+        }
+      },
+
+      updateItemQuantity: async (itemId: string, quantity: number) => {
+        set({ isLoading: true, error: null });
+        try {
+          const result = await updateCartItemQuantity(itemId, quantity);
+          
+          if (result.success) {
+            // Refresh cart data
+            const cart = await getCart();
+            set({ cart, isLoading: false });
+            return true;
+          } else {
+            set({ error: result.error || 'Failed to update quantity', isLoading: false });
+            return false;
+          }
+        } catch (error) {
+          console.error('Failed to update item quantity:', error);
+          set({ error: 'Failed to update quantity', isLoading: false });
+          return false;
+        }
+      },
+
+      clearCart: () => {
+        set({ cart: null, error: null });
+      },
+
+      getItemCount: () => {
+        const cart = get().cart;
+        return cart?.itemCount || 0;
+      },
+
+      getTotal: () => {
+        const cart = get().cart;
+        return cart?.total || 0;
+      },
     }),
     {
       name: 'cart-storage',
+      // Only persist the cart data, not the loading states
+      partialize: (state) => ({ cart: state.cart }),
     }
   )
 );
